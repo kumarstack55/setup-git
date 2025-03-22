@@ -7,6 +7,8 @@ on:
 
 jobs:
   call-reusable-workflow:
-    uses: ./.github/workflows/reusable-workflow.yml
-    with:
-      message: 'Hello from the reusable workflow!'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kumarstack55/setup-git@v1
+        with:
+          config-scope: '--global'

@@ -1,0 +1,59 @@
+name: 'Setup Git'
+
+description: 'Set up Git configuration such like name and email, etc.'
+
+inputs:
+  directory:
+    description: 'The directory where git commands are run.'
+    required: false
+    default: '.'
+  config-scope:
+    description: ''
+    required: false
+    default: "--local"
+  user-email:
+    description: 'The setting value of user.email'
+    required: false
+    default: 'you@example.com'
+  user-name:
+    description: 'The setting value of user.name'
+    required: false
+    default: 'Your Name'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Ensure that the directory exists
+      run: '[[ -d "${DIRECTORY}" ]]'
+      env:
+        DIRECTORY: ${{ inputs.directory }}
+      shell: bash
+
+    - name: Ensure that the directory is in git repository
+      run: '[[ "${CONFIG_SCOPE}" != "--local" ]] || git rev-parse --is-inside-work-tree'
+      working-directory: ${{ inputs.directory }}
+      env:
+        CONFIG_SCOPE: ${{ inputs.config-scope }}
+      shell: bash
+
+    - name: Confirm that the config scope is as expected
+      run: '[[ $CONFIG_SCOPE =~ ^--(local|global|system)$ ]]'
+      env:
+        CONFIG_SCOPE: ${{ inputs.config-scope }}
+      shell: bash
+
+    - name: Set user.name
+      run: git config "${CONFIG_SCOPE}" user.name "${USER_NAME}}"
+      working-directory: ${{ inputs.directory }}
+      env:
+        CONFIG_SCOPE: ${{ inputs.config-scope }}
+        USER_NAME: ${{ inputs.user-name }}
+      shell: bash
+
+    - name: Set user.email
+      run: git config "${CONFIG_SCOPE}" user.email "${USER_EMAIL}"
+      working-directory: ${{ inputs.directory }}
+      env:
+        CONFIG_SCOPE: ${{ inputs.config-scope }}
+        USER_EMAIL: ${{ inputs.user-email }}
+      shell: bash
